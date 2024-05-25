@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Prediction</title>
+    <link rel="stylesheet" type="text/css" href="../static/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Car Price Prediction</h1>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="length">Length</label>
+                <input type="range" id="length" name="length" min="3000" max="5000" value="4000" oninput="updateOutput(this)">
+                <output id="lengthOutput">4000</output>
+            </div>
+            <div class="form-group">
+                <label for="width">Width</label>
+                <input type="range" id="width" name="width" min="1200" max="2000" value="1600" oninput="updateOutput(this)">
+                <output id="widthOutput">1600</output>
+            </div>
+            <div class="form-group">
+                <label for="height">Height</label>
+                <input type="range" id="height" name="height" min="1200" max="2000" value="1600" oninput="updateOutput(this)">
+                <output id="heightOutput">1600</output>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="wheel_base">Wheel Base</label>
+                <input type="range" id="wheel_base" name="wheel_base" min="2000" max="4000" value="3000" oninput="updateOutput(this)">
+                <output id="wheelBaseOutput">3000</output>
+            </div>
+
+            <div class="form-group">
+                <label for="cargo_volume">Cargo Volume</label>
+                <input type="range" id="cargo_volume" name="cargo_volume" min="0" max="500" value="250" oninput="updateOutput(this)">
+                <output id="cargoVolumeOutput">250</output>
+            </div>
+            <div class="form-group">
+                <label for="seats">Seats</label>
+                <input type="range" id="seats" name="seats" min="2" max="10" value="5" oninput="updateOutput(this)">
+                <output id="seatsOutput">5</output>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="transmission">Transmission</label>
+                <select id="transmission" name="transmission">
+                    <option value="0">Automatic</option>
+                    <option value="1">Manual</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fuel">Fuel</label>
+                <select id="fuel" name="fuel">
+                    <option value="0">CNG</option>
+                    <option value="1">Diesel</option>
+                    <option value="2">Electric</option>
+                    <option value="3">LPG</option>
+                    <option value="4">Petrol</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="gear_box">Gear Box</label>
+                <select id="gear_box" name="gear_box">
+                    <option value="0">1 speed</option>
+                    <option value="1">4 speed</option>
+                    <option value="2">5 speed</option>
+                    <option value="3">6 speed</option>
+                    <option value="4">7 speed</option>
+                    <option value="5">8 speed</option>
+                    <option value="6">9 speed</option>
+                    <option value="7">CVT</option>
+                    <option value="8">DSG</option>
+                    <option value="9">Fully Automatic</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+            </div>
+            <div class="form-group">
+                <label for="max_torque">Max Torque At</label>
+                <input type="range" id="max_torque" name="max_torque" min="1000" max="4000" value="2000" oninput="updateOutput(this)">
+                <output id="maxTorqueOutput">2000</output>
+            </div>
+            <div class="form-group">
+            </div>
+        </div>
+
+        <button type="button" onclick="predictPrice()">Predict</button>
+
+        <div class="result" id="result">
+            {% if prediction_result is defined %}
+            Predicted Price: {{ "{:.3f}".format(prediction_result) }}
+            {% endif %}
+        </div>
+        <div class="watermark">Made by: 'Data Pioneers' Team</div>
+    </div>
+
+    <script>
+        function predictPrice() {
+            // Get the input values from the sliders and dropdowns
+            var length = document.getElementById('length').value;
+            var width = document.getElementById('width').value;
+            var height = document.getElementById('height').value;
+            var wheel_base = document.getElementById('wheel_base').value;
+            var seats = document.getElementById('seats').value;
+            var cargo_volume = document.getElementById('cargo_volume').value;
+            var max_torque = document.getElementById('max_torque').value;
+            var transmission = document.getElementById('transmission').value;
+            var fuel = document.getElementById('fuel').value;
+            var gear_box = document.getElementById('gear_box').value;
+
+            // Create data object to send to server
+            var data = {
+                'length': length,
+                'width': width,
+                'height': height,
+                'wheel_base': wheel_base,
+                'seats': seats,
+                'cargo_volume': cargo_volume,
+                'max_torque': max_torque,
+                'transmission': transmission,
+                'fuel': fuel,
+                'gear_box': gear_box
+            };
+
+            // Send AJAX request to the Flask server
+            fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the result div with the predicted price
+                    document.getElementById('result').innerHTML = 'Predicted Price: ' + data.predicted_price.toFixed(3);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function updateOutput(rangeInput) {
+            rangeInput.nextElementSibling.innerHTML = rangeInput.value;
+        }
+    </script>
+</body>
+
+</html>
